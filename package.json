@@ -1,0 +1,31 @@
+{
+  "name": "coinchart",
+  "version": "1.0.0",
+  "description": "FCC Backend Project to chart market prices of cryptocurrencies",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "FCC",
+    "Backend",
+    "Project",
+    "Stock",
+    "Market",
+    "App"
+  ],
+  "repository": "https://github.com/forkerino/coinchart.git",
+  "author": "Pieter Stokkink",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "ejs": "^2.5.6",
+    "express": "^4.14.1",
+    "rx": "^4.1.0",
+    "ws": "^2.1.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-sass": "^3.1.0"
+  }
+}
