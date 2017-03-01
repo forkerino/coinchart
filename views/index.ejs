@@ -1,16 +1,74 @@
 <!doctype html>
 <html>
-<head>
-	<title>CoinChart</title>
-	
-</head>	
-<body>
-	<div class="container">
-		<h1>CoinChart</h1>
-		
+	<head>
+		<title>CoinChart</title>
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+		<script>
+			const socket = io();
+			socket.on('currentset', function(coins){
+				socket.emit('addcoin', coins);
+			});
+		  	socket.on('coins', (coins) => showCoins(coins));
+		  	socket.on('coindata', (data) => chartData(data));
 
-	</div>
+		  	function showCoins(coins) {
+		  		const sortedCoins = coins.sort((a, b) => a.position24 - b.position24);
+		  		const topten = sortedCoins.slice(0,10);
 
-	<script type="text/javascript" src="/controllers/index.js"></script>
-</body>
+		  		topten.forEach(appendListItem);
+		  	}
+
+		  	function appendListItem(coin){
+		  		const list = document.getElementById('list');
+		  		const item = document.createElement('li');
+		  		item.innerHTML = `${coin.long} - ${coin.short}`;
+		  		list.appendChild(item);
+		  	}
+
+		  	function chartData(data) {
+		  		const ctx = document.getElementById('chart').getContext('2d');
+		  		const chartData = data
+		  			.map(function(coin){
+			  			return coin.price.map(function(datepricepair){
+		  					let date = new Date(datepricepair[0]).toDateString()
+		  						.split(' ').slice(1).join(' ');
+			  				let price = (datepricepair[1]);
+			  				return [date, price];
+			  			});
+			  		}) // [[[d, p],[d,p]],[[d,p],[d,p]]]
+		  			.
+		  			// .map(function(coin){
+	  				// 	return 
+		  			// }) 
+		  		console.log(chartData);
+		  	// 	const chart = new Chart(ctx, {
+		  	// 		type: 'line',
+		  	// 		data: {
+					//     labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+					//     datasets: [{
+					// 	    label: 'apples',
+					// 	    data: [12, 19, 3, 17, 6, 3, 7],
+					//     }, {
+					//       	label: 'oranges',
+					//       	data: [2, 29, 5, 5, 2, 3, 10],
+					//       	backgroundColor: "rgba(255,153,0,0.4)"
+					//     }]
+					// }
+		  	// 	});
+		  	}
+		</script>	
+	</head>
+	<body>
+		<div class="container">
+			<div>
+				<canvas id="chart" width="80%" height="90vh"></canvas>
+			</div>
+			<div>
+				<ul id="list">
+					
+				</ul>
+			</div>
+		</div>
+	</body>
 </html>
