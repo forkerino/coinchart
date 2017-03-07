@@ -38,7 +38,43 @@ const db = {
 			});
 	},
 
+	getCoinData: function getCoinData(coin, period='365day'){
+		const d = new Date() - (period == '1day' || period == '7day')? 300000 : 3600000;
+		Coin.find({coin: coin, period: period, timestamp: {$gt: d}}, 
+			function(err, data){
+				if (err) throw err;
+				return data;
+		});
+	},
 
+	setCoinData: function setCoinData(coin, period='365day', prices){
+		const d = new Date();
+		Coin.find({coin:coin, period: period},
+			function(err, data){
+				if (err) throw err;
+				if (data) {
+					Coin.findOneAndUpdate({coin:coin, period: period}, {
+						timestamp: d, 
+						prices: prices
+					}, 
+					function(err, data){
+						if (err) throw err;
+						console.log(data);
+					});
+				} else {
+					let coindata = new Coin();
+					coindata.coin = coin;
+					coindata.period = period;
+					coindata.timestamp = d;
+					coindata.prices = prices;
+					coindata.save(function(err,data){
+						if(err) throw err;
+						console.log(data);
+						return data;
+					});
+				}
+		});
+	}
 }
 
 module.exports = db;
