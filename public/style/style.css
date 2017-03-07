@@ -1,0 +1,88 @@
+body {
+	background-color: #222;
+	font-family: sans-serif;
+}
+
+ul {
+	list-style-type: none;
+}
+
+.coinlist {
+	color: red;
+	cursor: pointer;
+}
+
+.coinlist.on {
+	color: green;
+}
+
+#periods {
+	position: absolute;
+	top: 80px;
+	left: 30px;
+}
+
+#periods li {
+	color: white;
+	display: inline;
+	background-color: blue;
+	border-radius: 5px; 
+	padding: 3px;
+	cursor: pointer;
+}
+
+#periods li.selected {
+	color: #222;
+	background-color: #ccc;
+}
+
+#chartcontainer {
+	position:absolute; 
+	top:50px; 
+	bottom:10px; 
+	left:10px; 
+	width:80%; 
+}
+
+#listcontainer {
+	float: right;
+	width: 20%;
+}
+
+#search {
+	width: 95%;
+	border: 0;
+	padding-left: 5px;
+	border-radius: 3px;
+	height: 2em;
+	box-sizing: border-box;
+}
+
+#search:focus {
+	outline-color: #bbb;
+}
+
+#result {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	width: 95%;
+	padding: 0;
+}
+
+.searchresult {
+	background-color: white;
+	color: grey;
+	cursor: pointer;
+	height: 1.6em;
+	margin: 0;
+	padding: 0.5em;	
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-overflow: fade(10px);
+}
+
+.searchresult:hover {
+	background-color: #ddd; 
+}

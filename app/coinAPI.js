@@ -22,34 +22,3 @@ module.exports = function(path) {
             req.end();
         });
 }
-// module.exports = function(path){
-	
-// 	const headers = {};
-// 	let result = "";
-
-// 	let options = {
-// 		host,
-// 		path,
-// 		method: 'GET',
-// 		headers,
-// 	}
-
-// 	const req = https.request(options, function(res){
-// 		res.setEncoding('utf-8');
-
-// 		let responseString = '';
-
-// 		res.on('data', (data) => responseString += data);
-
-// 		res.on('end', function(){
-// 			return new Promise(function(resolve, reject){
-// 				if (responseString == "") reject("no response");
-// 				resolve(JSON.parse(responseString));
-// 			});
-// 		});
-// 	});
-
-// 	req.write(result);
-// 	req.end();
-	
-// }
