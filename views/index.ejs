@@ -163,7 +163,7 @@
 		  			}));
 		    
 		    socket.once('coins', (coins) => showCoins(coins));
-		  	// socket.on('coindata', (data) => chartData(data));
+		  	socket.on('coindata', (data) => chartData(data));
 		 
 		  	list.addEventListener('click', function(e){
 		  		e.preventDefault();

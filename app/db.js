@@ -9,25 +9,40 @@ mongoose.Promise = global.Promise;
 const db = {
 	getSet: function getSet(){
 		console.log("getSet called");
-		CoinSet.find({},function(err, data){
-			if (err) throw err;
-			console.log("data : " + data);
-			let coins = [];
-			if (data.coins) {
-				console.log("data.coins: " + data.coins);
-				data.coins.forEach(coins.push);
-			}
-			return coins;
-		});
+		let q = CoinSet.find({},"coins");
+		return q.exec();
+		
 	},
 
 	addToSet: function addToSet(coin){
 		console.log("addToSet called with " + coin);
-		CoinSet.findOneAndUpdate({}, {$push: {coins : coin}},
-			function(err, coins){
-				if (err) throw err;
-				return coins;
-			});
+		let q = CoinSet.find({}, "coins");
+		q.exec()
+			.then(function(data){
+				if (data[0].coins.length === 0){
+					let coinset = new CoinSet();
+					coinset.coins = [].push(coin);
+					coinset.save(function(err,coinset){
+						if (err) throw err;
+						console.log(coinset);
+						return new Promise (function(resolve, reject){
+							resolve(data[0].coins);
+						});
+					});
+				} else if (data[0].coins.indexOf(coin) != -1){
+					return data[0].coins;
+				} else {
+					CoinSet.findOneAndUpdate({}, 
+						{$push: {coins : coin}},
+						function(err, coins){
+							if (err) throw err;
+							return new Promise (function(resolve, reject){
+								resolve(coins);
+							});
+					});
+				}
+			})
+			.catch(err => console.error(err));
 	},
 
 	removeFromSet: function removeFromSet(coin){

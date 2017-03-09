@@ -19,25 +19,27 @@ app.use('/', express.static(process.cwd() + '/public'));
 mongoose.connect(process.env.MLAB_URI);
 
 io.on('connection', function(socket){
-	['BTC', 'ETH','DASH', 'XRP', 'LTC'].forEach(db.addToSet);
-	db.getSet().then(addCoin).catch(throws);
-	//addCoin(db.getSet());
 	console.log("Connected to Server");
-
+	db.getSet()
+		.then(data => addCoin(data[0].coins))
+		.catch(err => console.error(err));
+	
 	coinAPI('/front')
 		.then((data) => io.emit('coins', data))
 		.catch((err)=> console.error(err));
 
 	socket.on('addcoin', function(coin){
-		if (coin.coin.length!==0) set.push(coin.coin);
-		console.log(coin);
-		addCoin(set, coin.period);	
+		if (coin.coin.length!==0) db.addToSet(coin.coin)
+			.then(data => console.log(data))// addCoin(data[0].coins))
+			.catch(err => console.error(err));
+		// console.log(coin);
+		// addCoin(set, coin.period);	
 	});
 
 	socket.on('removecoin', function(coin){
-		if (coin.coin!=="") set.splice(set.indexOf(coin.coin), 1);
-		if (set.length === 0) io.emit('coindata', null);
-		addCoin(set, coin.period);
+		//if (coin.coin!=="") db.removeFromSet(coin.coin);
+		// if (set.length === 0) io.emit('coindata', null);
+		// addCoin(set, coin.period);
 	});
 
 });
@@ -50,13 +52,13 @@ app.get('/', (req, res)=> res.render('index.ejs', {
 
 server.listen(port);
 
-function addCoin(set, period='365day') {
-	console.log(set);
-	Promise.all(set.map(coin => coinAPI(`/history/${period}/${coin}`)))
+function addCoin(coinSet, period='365day') {
+	console.log("Set: ", coinSet);
+	Promise.all(coinSet.map(coin => coinAPI(`/history/${period}/${coin}`)))
 		.then(function(data){
 			let transformedData = data
 				.map(function(coin){
-		  			return [set, 
+		  			return [coinSet, 
 		  				coin.price.map(function(datepricepair){
 	  					let date = new Date(datepricepair[0]).toLocaleString();
 		  				let price = (datepricepair[1]);
