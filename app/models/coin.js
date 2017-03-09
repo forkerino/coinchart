@@ -5,11 +5,8 @@ const mongoose = require('mongoose');
 const coinSchema = mongoose.Schema({
 	coin: String,
 	period: String,
-	timestamp: Number,
-	prices: {
-		time: Number,
-		price: Number
-	}
+	timestamp: Date,
+	prices: [[]]
 });
 
 module.exports = mongoose.model('Coin', coinSchema);

@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 const express = require('express');
 const dotenv = require('dotenv').config();
 const path = require('path');
@@ -29,9 +29,15 @@ io.on('connection', function(socket){
 		.catch((err)=> console.error(err));
 
 	socket.on('addcoin', function(coin){
+		console.log('addcoin socketed ', coin.period);
+		console.log('coin: ', coin);
 		if (coin.coin.length!==0) {
 			db.addToSet(coin.coin)
-				.then(addCoin)
+				.then(data=>addCoin(data, coin.period))
+				.catch(err => console.error(err));
+		} else {
+			db.getSet()
+				.then(data=>addCoin(data, coin.period))
 				.catch(err => console.error(err));
 		}
 	});
@@ -39,9 +45,9 @@ io.on('connection', function(socket){
 	socket.on('removecoin', function(coin){
 		if (coin.coin!=="") {
 			db.removeFromSet(coin.coin)
-				.then(addCoin)
+				.then(data=>addCoin(data, coin.period))
 				.catch(err => console.error(err));
-		}
+		} 
 	});
 });
 
@@ -55,10 +61,29 @@ server.listen(port);
 
 function addCoin(coinSet, period='365day') {
 	console.log("Set: ", coinSet);
-	Promise.all(coinSet.map(coin => coinAPI(`/history/${period}/${coin}`)))
+	console.log("Period: ", period);
+	if (coinSet.length == 0) {
+		
+	}
+	let coinPromises = coinSet.map(function(coin){
+		return db.getCoinData(coin, period)
+			.then(function(data){
+				if (data == null) {
+					return coinAPI(`/history/${period}/${coin}`);
+				} else {
+					return data;
+				}
+			})
+			.catch(err => console.error(err));
+	});
+	console.log(coinPromises);
+	Promise.all(coinPromises)//coinSet.map(coin => coinAPI(`/history/${period}/${coin}`)))
 		.then(function(data){
+			// console.log(data);
 			let transformedData = data
-				.map(function(coin){
+				.map(function(coin, i){
+					// console.log(coin.price);
+					db.setCoinData(coinSet[i], period, coin.price);
 		  			return [coinSet, 
 		  				coin.price.map(function(datepricepair){
 	  					let date = new Date(datepricepair[0]).toLocaleString();
@@ -75,9 +100,9 @@ function addCoin(coinSet, period='365day') {
 			  	});
 
 			let datasets = transformedData[0].map(function(c,i){
-				let r = Math.floor(Math.random() * 128)+128;
-	            let g = Math.floor(Math.random() * 128)+128;
-	            let b = Math.floor(Math.random() * 128)+128;
+				let r = Math.floor(Math.random() * 64)+192;
+	            let g = Math.floor(Math.random() * 64)+192;
+	            let b = Math.floor(Math.random() * 64)+192;
 				let randomColor = `rgba(${r}, ${g},${b}, 1)`;
 				let randomColorB = `rgba(${r}, ${g},${b}, 0.8)`;
 				return {
