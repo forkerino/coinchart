@@ -21,7 +21,7 @@ mongoose.connect(process.env.MLAB_URI);
 io.on('connection', function(socket){
 	console.log("Connected to Server");
 	db.getSet()
-		.then(data => addCoin(data[0].coins))
+		.then(addCoin)
 		.catch(err => console.error(err));
 	
 	coinAPI('/front')
@@ -29,19 +29,20 @@ io.on('connection', function(socket){
 		.catch((err)=> console.error(err));
 
 	socket.on('addcoin', function(coin){
-		if (coin.coin.length!==0) db.addToSet(coin.coin)
-			.then(data => console.log(data))// addCoin(data[0].coins))
-			.catch(err => console.error(err));
-		// console.log(coin);
-		// addCoin(set, coin.period);	
+		if (coin.coin.length!==0) {
+			db.addToSet(coin.coin)
+				.then(addCoin)
+				.catch(err => console.error(err));
+		}
 	});
 
 	socket.on('removecoin', function(coin){
-		//if (coin.coin!=="") db.removeFromSet(coin.coin);
-		// if (set.length === 0) io.emit('coindata', null);
-		// addCoin(set, coin.period);
+		if (coin.coin!=="") {
+			db.removeFromSet(coin.coin)
+				.then(addCoin)
+				.catch(err => console.error(err));
+		}
 	});
-
 });
 
 app.set('view engine', 'ejs');
