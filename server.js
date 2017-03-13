@@ -8,6 +8,7 @@ const socket = require('socket.io');
 const coinAPI = require('./app/coinAPI');
 const mongoose = require('mongoose');
 const db = require('./app/db');
+const favicon = require('serve-favicon');
 
 const app = express();
 const server = http.createServer(app);
@@ -15,6 +16,7 @@ const io = socket(server);
 
 mongoose.Promise = global.Promise;
 app.use('/', express.static(process.cwd() + '/public'));
+app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
 
 mongoose.connect(process.env.MLAB_URI);
 

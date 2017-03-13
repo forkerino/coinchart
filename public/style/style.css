@@ -22,7 +22,7 @@ ul {
 	clear: both;
 }
 
-#title h1 {
+h1 {
 	height: 1.6em;
 	color: #eee;
 	margin-top: 0px;
@@ -44,8 +44,8 @@ ul {
 
 #periods {
 	position: absolute;
-	bottom: 0px;
-	left: 50px;
+	top: 50px;
+	left: 30px;
 }
 
 #periods li {
@@ -69,7 +69,7 @@ ul {
 
 #chartcontainer {
 	position:absolute; 
-	top:50px; 
+	top:100px; 
 	bottom:30px; 
 	left:10px; 
 	width:80%; 
