@@ -41,7 +41,7 @@
 		<script>
 			const socket = io();
 			const list = document.getElementById('list');
-			const periods = document.getElementById('periods');
+			const periodbtns = document.getElementById('periods');
 			const search = document.getElementById('search');
 			const result = document.getElementById('result');
 			let chart = null; 
@@ -84,13 +84,13 @@
 		  		
 		  	});
 
-		  	periods.addEventListener('click', function(e){
+		  	periodbtns.addEventListener('click', function(e){
 		  		e.preventDefault();
 		  		userTimeFrame = e.target.id;
 		  		if (e.target.classList.contains('selected')) return;
 		  		socket.emit('addcoin', {coin: [], period: userTimeFrame});
-		  		for (let i = 0; i<periods.children.length; i++){
-		  			periods.children[i].classList.remove('selected');
+		  		for (let i = 0; i<periodbtns.children.length; i++){
+		  			periodbtns.children[i].classList.remove('selected');
 		  		}
 		  		e.target.classList.add('selected');
 		  	});
