@@ -41,16 +41,32 @@
 			let chart = null; 
 			let userTimeFrame = '365day';
   
-		    socket.once('coins', (coins) => showCoins(coins));
+		    //socket.once('coins', (coins) => populateSearch(coins));
+		    socket.on('coinset', function(coins){
+		    	list.innerHTML = "";
+		    	coins.forEach(function(coin){
+		    		appendListItem(coin, list, "coinlist on");
+		    	});	
+		    	socket.once('coins', function(search){
+		    		// console.log("search: ",search);
+		    		// console.log("coins: ", coins);
+		    		// search = search.filter(function(coin){
+		    		// 	return !(coins.map(c => c.short).includes(coin.short));
+		    		// }); 
+		    		// console.log("search2: ", search);
+		    		populateSearch(search, coins);
+		    	});
+		    });
 		  	socket.on('coindata', (data) => chartData(data));
 		 
 		  	list.addEventListener('click', function(e){
 		  		e.preventDefault();
-		  		let coin = e.target.id;
+		  		let coin = {short: e.target.id, long: e.target.innerHTML.split(' - ')[0]};
+		  		console.log(coin);
 		  		if (!e.target.classList.toggle('on')){
 		  			socket.emit('removecoin', {coin, period: userTimeFrame});
 		  		} else {
-		  			socket.emit('addcoin', {coin: coin, period: userTimeFrame});
+		  			socket.emit('addcoin', {coin, period: userTimeFrame});
 		  		}
 		  	});
 
@@ -67,35 +83,26 @@
 
 		  	result.addEventListener('click', function(e){
 		  		e.preventDefault();
-		  		let coin = e.target;
-		  		socket.emit('addcoin', {coin: coin.id, period: userTimeFrame});
-		  		coin.long = coin.innerHTML.split(' - ')[1];
-		  		coin.short = coin.id;
+		  		let coin = {long: e.target.innerHTML.split(' - ')[0], short: e.target.id};
+		  		socket.emit('addcoin', {coin, period: userTimeFrame});
+		  		console.log(coin);
 		  		appendListItem(coin, list, "coinlist on");
+		  		//removeFromSearch(coin.short);
 		  		result.innerHTML = "";
 		  		search.value = "";
 		  	});
 
-		  	function showCoins(coins) {
-		  		const sortedCoins = coins.sort((a, b) => a.position24 - b.position24).map(v => ({
-		  				long: v.long, 
-		  				short: v.short, 
-		  				price: v.price
-		  			}));
-		  		const topfive = sortedCoins.slice(0,5);
-
-		  		topfive.forEach(function(c){
-		  			appendListItem(c, list, "coinlist on");
-		  		});
-		  		
+		  	function populateSearch(coins, excluded) {
 		  		search.addEventListener('input', function(e){
 			  		e.preventDefault();
 			  		result.innerHTML = "";
 			  		search.setAttribute('style', 'border-radius: 3px');
 			  		let term = e.target.value.trim();
 			  		if (term.length < 2) return;
-			  		let results = sortedCoins.slice(5).filter(n => n.long.toLowerCase().indexOf(term) >= 0 || n.short.toLowerCase().indexOf(term) >= 0).slice(0,8);
-			  		console.log(results);
+			  		let results = coins.filter(n => n.long.toLowerCase().indexOf(term) >= 0 || 
+			  									n.short.toLowerCase().indexOf(term) >= 0 ||
+			  									!excluded.map(c => c.short).includes(n.short)).slice(0,8);
+			  		// console.log(results);
 			  		if (results.length > 0){
 			  			results.forEach(function(c){
 			  				appendListItem(c, result, `searchresult ${c.short}`);
@@ -104,7 +111,12 @@
 			  		} 
 		  		});
 		  	}
-
+			
+			function removeFromSearch(coin){
+				console.log("remove : ", coin);
+				document.getElementsByClassName(`searchresult ${coin}`)[0].setAttribute("hidden", true);
+			}
+			
 		  	function appendListItem(coin, element, classes){
 		  		const item = document.createElement('li');
 		  		item.setAttribute("id" , coin.short);

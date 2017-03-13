@@ -21,31 +21,50 @@ mongoose.connect(process.env.MLAB_URI);
 io.on('connection', function(socket){
 	console.log("Connected to Server");
 	db.getSet()
+		.then(function(coins){
+			io.emit('coinset', coins);	
+			return coins;
+		})
 		.then(addCoin)
 		.catch(err => console.error(err));
+		
+	db.getList()
+		.then(function(data){
+		if (data == null || data.timestamp - new Date() >= 86400000){ // refresh once a day
+			coinAPI('/front')
+				.then(function(data){
+					const sortedCoins = data.sort((a, b) => a.position24 - b.position24).map(v => ({
+		  				long: v.long, 
+		  				short: v.short, 
+		  				price: v.price
+		  			}));
+					io.emit('coins', sortedCoins);
+					db.setList(data);
+				})
+				.catch((err)=> console.error(err));
+		} else {
+			io.emit('coins', data);
+		}
+	})
+		.catch(err => console.error(err));
 	
-	coinAPI('/front')
-		.then((data) => io.emit('coins', data))
-		.catch((err)=> console.error(err));
-
-	socket.on('addcoin', function(coin){
-		console.log('addcoin socketed ', coin.period);
-		console.log('coin: ', coin);
-		if (coin.coin.length!==0) {
-			db.addToSet(coin.coin)
-				.then(data=>addCoin(data, coin.period))
+	socket.on('addcoin', function(coindata){
+		if (coindata.coin.length!==0) {
+			db.addToSet(coindata.coin)
+				.then(data=>addCoin(data, coindata.period))
 				.catch(err => console.error(err));
 		} else {
 			db.getSet()
-				.then(data=>addCoin(data, coin.period))
+				.then(data=>addCoin(data, coindata.period))
 				.catch(err => console.error(err));
 		}
 	});
 
-	socket.on('removecoin', function(coin){
-		if (coin.coin!=="") {
-			db.removeFromSet(coin.coin)
-				.then(data=>addCoin(data, coin.period))
+	socket.on('removecoin', function(coindata){
+		console.log('removecoin: ', coindata);
+		if (coindata.coin!=="") {
+			db.removeFromSet(coindata.coin)
+				.then(data=>addCoin(data, coindata.period))
 				.catch(err => console.error(err));
 		} 
 	});
@@ -61,22 +80,22 @@ server.listen(port);
 
 function addCoin(coinSet, period='365day') {
 	console.log("Set: ", coinSet);
-	console.log("Period: ", period);
-	if (coinSet.length == 0) {
-		
-	}
+	// console.log("Period: ", period);
 	let coinPromises = coinSet.map(function(coin){
-		return db.getCoinData(coin, period)
+		return db.getCoinData(coin.short, period)
 			.then(function(data){
 				if (data == null) {
-					return coinAPI(`/history/${period}/${coin}`);
+					return coinAPI(`/history/${period}/${coin.short}`);
 				} else {
 					return data;
 				}
 			})
 			.catch(err => console.error(err));
 	});
-	console.log(coinPromises);
+	if (coinPromises.length == 0) {
+		io.emit('coindata', null);
+		return;
+	}
 	Promise.all(coinPromises)//coinSet.map(coin => coinAPI(`/history/${period}/${coin}`)))
 		.then(function(data){
 			// console.log(data);
@@ -84,15 +103,15 @@ function addCoin(coinSet, period='365day') {
 				.map(function(coin, i){
 					// console.log(coin.price);
 					db.setCoinData(coinSet[i], period, coin.price);
-		  			return [coinSet, 
+		  			return [coinSet.map(c => c.short), 
 		  				coin.price.map(function(datepricepair){
-	  					let date = new Date(datepricepair[0]).toLocaleString();
-		  				let price = (datepricepair[1]);
-		  				return [date,price];
-		  			})
-		  			.reduce(function(pre, curr){
-		  					return [pre[0].concat(curr[0]),pre[1].concat(curr[1])];
-	  				},[[],[]])]; // [[[ddd],[ppp]],[[ddd],[ppp]]]
+			  				let date = new Date(datepricepair[0]).toLocaleString();
+			  				let price = (datepricepair[1]);
+			  				return [date,price];
+			  			}) // [[[d,p],[d,p]],[[d,p],[d,p]]]
+			  			.reduce(function(pre, curr){
+			  					return [pre[0].concat(curr[0]),pre[1].concat(curr[1])];
+			  			},[[],[]])]; // [[[ddd],[ppp]],[[ddd],[ppp]]]
 		  		})
 		  		.reduce(function(pre, curr, i){
 		  			pre[1].push(curr[1][1]); 
@@ -119,9 +138,10 @@ function addCoin(coinSet, period='365day') {
 			});
 
 			let chartData = {
-				labels: transformedData[1][0],
+				labels: [...new Set(...transformedData[1])],
 				datasets
 			};
+
 			io.emit('coindata', chartData);
 		})
 		.catch(err=> console.error(err));

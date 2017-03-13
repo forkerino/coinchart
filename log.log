@@ -1,0 +1,5 @@
+To do:
+- Hook up list of coins to the set in the db.
+- Put long list in db, refresh once a day.
+- Put delete button next to items in list.
+- Make it look pretty.

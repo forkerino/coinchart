@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const coinSchema = mongoose.Schema({
 	coin: String,
 	period: String,
-	timestamp: Date,
+	timestamp: {type: Date, expires: 3600},
 	prices: [[]]
 });
 
