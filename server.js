@@ -126,11 +126,16 @@ function addCoin(coinSet, period='365day') {
 				"rgba(218, 112, 214", "rgba(0, 128, 128", "rgba(64, 224, 208", "rgba(46, 139, 87", "rgba(128, 128, 0", 
 				"rgba(255, 69, 0", "rgba(250, 128, 114", "rgba(199, 21, 133", "rgba(221, 160, 221", "rgba(244, 164, 96",
 				"rgba(210, 105, 30", "rgba(222, 184, 135", "rgba(255, 215, 0", "rgba(107, 142, 35", "rgba(188, 143, 143"];
-
+			let pickedcolors = [];
 			let datasets = transformedData[0].map(function(c,i){
-				let randC = Math.floor(Math.random() * colors.length);
+				let randC;
+				do { 
+					randC = Math.floor(Math.random() * colors.length);
+				} while (pickedcolors.includes(randC));
+				pickedcolors.push(randC);
 				let randomColor = `${colors[randC]}, 1)`;
 				let randomColorB = `${colors[randC]}, 0.8)`;
+				
 				return {
 					label: c, 
 					data: transformedData[1][i+1], 
