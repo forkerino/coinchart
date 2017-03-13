@@ -70,6 +70,10 @@ io.on('connection', function(socket){
 				.catch(err => console.error(err));
 		} 
 	});
+	
+	socket.on('changeperiod', function(period){
+		socket.broadcast.emit('changeperiod', period);	
+	});
 });
 
 app.set('view engine', 'ejs');

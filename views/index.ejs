@@ -40,20 +40,20 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
 		<script>
 			const socket = io();
-			const list = document.getElementById('list');
+			const listofcoins = document.getElementById('list');
 			const periodbtns = document.getElementById('periods');
-			const search = document.getElementById('search');
-			const result = document.getElementById('result');
+			const searchbox = document.getElementById('search');
+			const resultlist = document.getElementById('result');
 			let chart = null; 
 			let userTimeFrame = '365day';
 			let coinlist = [];
   
 		    //socket.once('coins', (coins) => populateSearch(coins));
 		    socket.on('coinset', function(coins){
-		    	list.innerHTML = "";
+		    	listofcoins.innerHTML = "";
 		    	coins.sort((a,b)=> a.short - b.short);
 		    	coins.forEach(function(coin){
-		    		appendListItem(coin, list, "coinlist on");
+		    		appendListItem(coin, listofcoins, "coinlist on");
 		    	});	
 		    	socket.once('coins', function(search){
 		    		coinlist = search;
@@ -61,8 +61,14 @@
 		    	});
 		    });
 		  	socket.on('coindata', (data) => chartData(data));
+		  	socket.on('changeperiod', function(period){
+		  		for (let i = 0; i<periodbtns.children.length; i++){
+		  			periodbtns.children[i].classList.remove('selected');
+		  		}
+		  		document.getElementById(period).classList.add('selected');
+		  	});
 		 
-		  	list.addEventListener('click', function(e){
+		  	listofcoins.addEventListener('click', function(e){
 		  		e.preventDefault();
 		  		if (e.target.innerHTML != 'x'){
 		  			let coin = {short: e.target.id, long: e.target.innerHTML.split(' - ')[0]};
@@ -76,7 +82,7 @@
 		  		} else {
 		  			console.log(e.target.parentNode);
 		  			
-		  			list.removeChild(e.target.parentNode);
+		  			listofcoins.removeChild(e.target.parentNode);
 		  			let coin = {short: e.target.parentNode.id, long: e.target.parentNode.innerHTML.split(' - ')[0]};
 		  			socket.emit('removecoin', {coin, period: userTimeFrame});
 		  			populateSearch(coinlist);
@@ -89,31 +95,32 @@
 		  		userTimeFrame = e.target.id;
 		  		if (e.target.classList.contains('selected')) return;
 		  		socket.emit('addcoin', {coin: [], period: userTimeFrame});
+		  		socket.emit('changeperiod', userTimeFrame);
 		  		for (let i = 0; i<periodbtns.children.length; i++){
 		  			periodbtns.children[i].classList.remove('selected');
 		  		}
 		  		e.target.classList.add('selected');
 		  	});
 
-		  	result.addEventListener('click', function(e){
+		  	resultlist.addEventListener('click', function(e){
 		  		e.preventDefault();
 		  		let coin = {long: e.target.innerHTML.split(' - ')[0], short: e.target.id};
 		  		socket.emit('addcoin', {coin, period: userTimeFrame});
 		  		console.log(coin);
-		  		appendListItem(coin, list, "coinlist on");
+		  		appendListItem(coin, listofcoins, "coinlist on");
 		  		
-		  		result.innerHTML = "";
-		  		search.value = "";
+		  		resultlist.innerHTML = "";
+		  		searchbox.value = "";
 		  	});
 
 		  	function populateSearch(coins, excluded=[]) {
-		  		search.addEventListener('input', function(e){
+		  		searchbox.addEventListener('input', function(e){
 			  		e.preventDefault();
-			  		result.innerHTML = "";
-			  		search.setAttribute('style', 'border-radius: 3px');
+			  		resultlist.innerHTML = "";
+			  		searchbox.setAttribute('style', 'border-radius: 3px');
 			  		let term = e.target.value.trim();
 			  		if (term.length < 2) return;
-			  		let ex = [...list.children].map(li => li.innerHTML.split("-")[1].split('<')[0].trim()); 
+			  		let ex = [...listofcoins.children].map(li => li.innerHTML.split("-")[1].split('<')[0].trim()); 
 			  		let results = coins.filter(n => (n.long.toLowerCase().indexOf(term) >= 0 || 
 			  									n.short.toLowerCase().indexOf(term) >= 0) &&
 			  									!excluded.map(c => c.short).includes(n.short) && 
@@ -122,8 +129,8 @@
 			  		
 			  		if (results.length > 0){
 			  			results.forEach(function(c){
-			  				appendListItem(c, result, `searchresult ${c.short}`);
-			  				search.setAttribute('style', 'border-radius: 3px 3px 0 0;');
+			  				appendListItem(c, resultlist, `searchresult ${c.short}`);
+			  				searchbox.setAttribute('style', 'border-radius: 3px 3px 0 0;');
 			  			});
 			  		} 
 			  		
@@ -134,7 +141,7 @@
 		  		const item = document.createElement('li');
 		  		item.setAttribute("id" , coin.short);
 		  		item.setAttribute("class", classes);
-		  		if (element == list) {
+		  		if (element == listofcoins) {
 		  			item.innerHTML = `${coin.long} - ${coin.short}<span class="removeListitem">x</span>`; 
 		  		} else {
 		  			item.innerHTML = `${coin.long} - ${coin.short}`;
