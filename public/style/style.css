@@ -30,12 +30,12 @@ h1 {
 }
 
 .coinlist {
-	color: red;
+	color: grey;
 	cursor: pointer;
 }
 
 .coinlist.on {
-	color: green;
+	color: black;
 }
 
 .removeListitem {
@@ -73,6 +73,7 @@ h1 {
 	bottom:30px; 
 	left:10px; 
 	width:80%; 
+	min-width: 500px;
 	box-sizing: border-box;
 }
 
@@ -127,3 +128,8 @@ li span {
 	float: right;
 }
 
+.credit {
+	position: absolute;
+	bottom: 5px;
+	right: 10px;
+}

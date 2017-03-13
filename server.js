@@ -120,6 +120,8 @@ function addCoin(coinSet, period='365day') {
 		  			return pre;
 			  	});
 			  	
+			// console.log("Chartdata: ", transformedData);
+			  	
 			const colors = ["rgba(0, 255, 255", "rgba(220, 20, 60", "rgba(255, 20, 147", "rgba(218, 165, 32", "rgba(32, 178, 170", 
 				"rgba(218, 112, 214", "rgba(0, 128, 128", "rgba(64, 224, 208", "rgba(46, 139, 87", "rgba(128, 128, 0", 
 				"rgba(255, 69, 0", "rgba(250, 128, 114", "rgba(199, 21, 133", "rgba(221, 160, 221", "rgba(244, 164, 96",

@@ -32,7 +32,9 @@
 				<ul id="result">
 					
 				</ul>
+				
 			</div>
+			<p class="credit">Powered by:<img src="/img/coincap_sm.png"/></p>
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
@@ -141,6 +143,7 @@
 		  	}
 
 		  	function chartData(data) {
+		  		console.log(data);
 		  		if (chart !== null) chart.destroy();
 		  		const ctx = document.getElementById('chart').getContext('2d');
 		  		chart = new Chart(ctx, {
@@ -159,7 +162,7 @@
 				        	xAxes: [{
 							    type: 'time',
 							    ticks: {
-							        autoSkip: true,
+							        //autoSkip: true,
 							        maxTicksLimit: 12
 							    }
 							}]
