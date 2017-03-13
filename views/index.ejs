@@ -1,12 +1,16 @@
 <!doctype html>
 <html>
 	<head>
-		<title>CoinChart - To the Moon!</title>
+		<title>CoinChart - to the Moon!</title>
+		<link href="https://fonts.googleapis.com/css?family=Titillium+Web:300,400" rel="stylesheet">
 		<link rel="stylesheet" href="/style/style.css">
+		
 	</head>
 	<body>
 		<div class="container">
-			<h1>CoinChart - To the moon!</h1>
+			<div id="title">
+				<h1 class="title">CoinChart - to the moon!</h1>
+			</div>
 			<div id="chartcontainer">
 				<canvas id="chart"></canvas>
 			</div>
@@ -24,7 +28,7 @@
 				<ul id="list">
 					
 				</ul>
-				<input id="search" type="text" placeholder="..." value="" autocomplete="off">
+				<input id="search" type="text" placeholder="Search for coins..." value="" autocomplete="off">
 				<ul id="result">
 					
 				</ul>
@@ -40,20 +44,17 @@
 			const result = document.getElementById('result');
 			let chart = null; 
 			let userTimeFrame = '365day';
+			let coinlist = [];
   
 		    //socket.once('coins', (coins) => populateSearch(coins));
 		    socket.on('coinset', function(coins){
 		    	list.innerHTML = "";
+		    	coins.sort((a,b)=> a.short - b.short);
 		    	coins.forEach(function(coin){
 		    		appendListItem(coin, list, "coinlist on");
 		    	});	
 		    	socket.once('coins', function(search){
-		    		// console.log("search: ",search);
-		    		// console.log("coins: ", coins);
-		    		// search = search.filter(function(coin){
-		    		// 	return !(coins.map(c => c.short).includes(coin.short));
-		    		// }); 
-		    		// console.log("search2: ", search);
+		    		coinlist = search;
 		    		populateSearch(search, coins);
 		    	});
 		    });
@@ -61,13 +62,24 @@
 		 
 		  	list.addEventListener('click', function(e){
 		  		e.preventDefault();
-		  		let coin = {short: e.target.id, long: e.target.innerHTML.split(' - ')[0]};
-		  		console.log(coin);
-		  		if (!e.target.classList.toggle('on')){
-		  			socket.emit('removecoin', {coin, period: userTimeFrame});
+		  		if (e.target.innerHTML != 'x'){
+		  			let coin = {short: e.target.id, long: e.target.innerHTML.split(' - ')[0]};
+			  		if (!e.target.classList.toggle('on')){
+			  			socket.emit('removecoin', {coin, period: userTimeFrame});
+			  			populateSearch(coinlist);
+			  		} else {
+			  			socket.emit('addcoin', {coin, period: userTimeFrame});
+			  			populateSearch(coinlist);
+			  		}
 		  		} else {
-		  			socket.emit('addcoin', {coin, period: userTimeFrame});
+		  			console.log(e.target.parentNode);
+		  			
+		  			list.removeChild(e.target.parentNode);
+		  			let coin = {short: e.target.parentNode.id, long: e.target.parentNode.innerHTML.split(' - ')[0]};
+		  			socket.emit('removecoin', {coin, period: userTimeFrame});
+		  			populateSearch(coinlist);
 		  		}
+		  		
 		  	});
 
 		  	periods.addEventListener('click', function(e){
@@ -87,41 +99,44 @@
 		  		socket.emit('addcoin', {coin, period: userTimeFrame});
 		  		console.log(coin);
 		  		appendListItem(coin, list, "coinlist on");
-		  		//removeFromSearch(coin.short);
+		  		
 		  		result.innerHTML = "";
 		  		search.value = "";
 		  	});
 
-		  	function populateSearch(coins, excluded) {
+		  	function populateSearch(coins, excluded=[]) {
 		  		search.addEventListener('input', function(e){
 			  		e.preventDefault();
 			  		result.innerHTML = "";
 			  		search.setAttribute('style', 'border-radius: 3px');
 			  		let term = e.target.value.trim();
 			  		if (term.length < 2) return;
-			  		let results = coins.filter(n => n.long.toLowerCase().indexOf(term) >= 0 || 
-			  									n.short.toLowerCase().indexOf(term) >= 0 ||
-			  									!excluded.map(c => c.short).includes(n.short)).slice(0,8);
-			  		// console.log(results);
+			  		let ex = [...list.children].map(li => li.innerHTML.split("-")[1].split('<')[0].trim()); 
+			  		let results = coins.filter(n => (n.long.toLowerCase().indexOf(term) >= 0 || 
+			  									n.short.toLowerCase().indexOf(term) >= 0) &&
+			  									!excluded.map(c => c.short).includes(n.short) && 
+			  									!ex.includes(n.short)
+			  									).slice(0,8);
+			  		
 			  		if (results.length > 0){
 			  			results.forEach(function(c){
 			  				appendListItem(c, result, `searchresult ${c.short}`);
 			  				search.setAttribute('style', 'border-radius: 3px 3px 0 0;');
 			  			});
 			  		} 
+			  		
 		  		});
 		  	}
-			
-			function removeFromSearch(coin){
-				console.log("remove : ", coin);
-				document.getElementsByClassName(`searchresult ${coin}`)[0].setAttribute("hidden", true);
-			}
 			
 		  	function appendListItem(coin, element, classes){
 		  		const item = document.createElement('li');
 		  		item.setAttribute("id" , coin.short);
 		  		item.setAttribute("class", classes);
-		  		item.innerHTML = `${coin.long} - ${coin.short}`;
+		  		if (element == list) {
+		  			item.innerHTML = `${coin.long} - ${coin.short}<span class="removeListitem">x</span>`; 
+		  		} else {
+		  			item.innerHTML = `${coin.long} - ${coin.short}`;
+		  		}
 		  		element.appendChild(item);
 		  	}
 

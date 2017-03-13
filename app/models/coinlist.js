@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const coinListSchema = mongoose.Schema({
-    timestamp: Date,
+    timestamp: { type: Date, expires: 86400 },
 	coins : []
 });
 

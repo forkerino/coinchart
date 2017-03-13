@@ -1,10 +1,32 @@
 body {
-	background-color: #222;
-	font-family: sans-serif;
+	background-color: #eee;
+	font-family: 'Titillium Web', sans-serif;
 }
 
 ul {
 	list-style-type: none;
+	padding-left: 0px;
+	width: 95%;
+}
+
+#title {
+	text-align: center;
+	background: Teal;
+	width: 100%;
+	height: 50px;
+	top: 0px;
+	left: 0px;
+	padding: 0;
+	margin: 0 0 20px 0;
+	position: absolute;
+	clear: both;
+}
+
+#title h1 {
+	height: 1.6em;
+	color: #eee;
+	margin-top: 0px;
+	font-weight: 300;
 }
 
 .coinlist {
@@ -16,42 +38,56 @@ ul {
 	color: green;
 }
 
+.removeListitem {
+	color: red;
+}
+
 #periods {
 	position: absolute;
-	top: 80px;
-	left: 30px;
+	bottom: 0px;
+	left: 50px;
 }
 
 #periods li {
-	color: white;
+	color: #eee;
 	display: inline;
-	background-color: blue;
+	background-color: Teal;
 	border-radius: 5px; 
-	padding: 3px;
+	border: 2px solid Teal;
+	padding: 1px 5px;
+	margin-right: 20px;
 	cursor: pointer;
+	box-sizing: border-box;
 }
 
 #periods li.selected {
 	color: #222;
-	background-color: #ccc;
+	background-color: #eee;
+	
+	box-sizing: border-box;
 }
 
 #chartcontainer {
 	position:absolute; 
 	top:50px; 
-	bottom:10px; 
+	bottom:30px; 
 	left:10px; 
 	width:80%; 
+	box-sizing: border-box;
 }
 
 #listcontainer {
 	float: right;
-	width: 20%;
+	width: 16%;
+	top: 50px;
+	right: 10px;
+	position: absolute;
+	
 }
 
 #search {
 	width: 95%;
-	border: 0;
+	border: 1px solid #bbb;
 	padding-left: 5px;
 	border-radius: 3px;
 	height: 2em;
@@ -86,3 +122,8 @@ ul {
 .searchresult:hover {
 	background-color: #ddd; 
 }
+
+li span {
+	float: right;
+}
+
