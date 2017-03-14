@@ -120,6 +120,14 @@ function addCoin(coinSet, period='365day') {
 			  			},[[],[]])]; // [[[ddd],[ppp]],[[ddd],[ppp]]]
 		  		})
 		  		.reduce(function(pre, curr, i){
+		  			if (pre[1][0].length < curr[1][0].length) {
+		  				let diff = curr[1][0].length - pre[1][0].length;
+		  				pre[1][0] = curr[1][0];
+		  				while (diff > 0){
+		  					pre[1][1].unshift(null);
+		  					diff--;
+		  				}
+		  			}
 		  			pre[1].push(curr[1][1]); 
 		  			return pre;
 			  	});
